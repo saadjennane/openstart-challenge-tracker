@@ -71,6 +71,7 @@ model User {
   email     String   @unique
   password  String
   name      String
+  entity    String   @default("WENOV") // 'WENOV' or 'CEED'
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

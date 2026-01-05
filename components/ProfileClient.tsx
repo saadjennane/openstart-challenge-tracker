@@ -10,6 +10,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  entity: string;
   isAdmin: boolean;
   createdAt: Date;
 }
@@ -139,11 +140,20 @@ export default function ProfileClient({ user }: ProfileClientProps) {
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">{user.name}</h2>
                 <p className="text-sm text-gray-500">{user.email}</p>
-                {user.isAdmin && (
-                  <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800 rounded">
-                    Administrateur
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                    user.entity === 'WENOV'
+                      ? 'bg-indigo-100 text-indigo-800'
+                      : 'bg-emerald-100 text-emerald-800'
+                  }`}>
+                    {user.entity}
                   </span>
-                )}
+                  {user.isAdmin && (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 rounded">
+                      Administrateur
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

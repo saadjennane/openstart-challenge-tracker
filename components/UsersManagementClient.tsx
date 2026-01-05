@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import { createUser, updateUser, deleteUser } from '@/lib/auth-actions';
 import Link from 'next/link';
 
+type UserEntity = 'WENOV' | 'CEED';
+
 interface User {
   id: string;
   email: string;
   name: string;
+  entity: string;
   isAdmin: boolean;
   createdAt: Date;
 }
@@ -25,6 +28,7 @@ export default function UsersManagementClient({ users, currentUserId }: UsersMan
     email: '',
     password: '',
     name: '',
+    entity: 'WENOV' as UserEntity,
     isAdmin: false,
   });
   const [error, setError] = useState('');
@@ -40,7 +44,7 @@ export default function UsersManagementClient({ users, currentUserId }: UsersMan
     try {
       await createUser(newUser);
       setMessage('Utilisateur créé avec succès');
-      setNewUser({ email: '', password: '', name: '', isAdmin: false });
+      setNewUser({ email: '', password: '', name: '', entity: 'WENOV', isAdmin: false });
       setShowAddForm(false);
       router.refresh();
     } catch (err) {
@@ -180,6 +184,33 @@ export default function UsersManagementClient({ users, currentUserId }: UsersMan
                   minLength={6}
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Entité</label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNewUser({ ...newUser, entity: 'WENOV' })}
+                    className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      newUser.entity === 'WENOV'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    WENOV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewUser({ ...newUser, entity: 'CEED' })}
+                    className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      newUser.entity === 'CEED'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    CEED
+                  </button>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <input
                   id="isAdmin"
@@ -229,8 +260,15 @@ export default function UsersManagementClient({ users, currentUserId }: UsersMan
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-gray-900">{user.name}</p>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                        user.entity === 'WENOV'
+                          ? 'bg-indigo-100 text-indigo-800'
+                          : 'bg-emerald-100 text-emerald-800'
+                      }`}>
+                        {user.entity}
+                      </span>
                       {user.isAdmin && (
-                        <span className="px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800 rounded">
+                        <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 rounded">
                           Admin
                         </span>
                       )}

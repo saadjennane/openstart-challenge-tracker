@@ -16,6 +16,7 @@ export async function getUsers() {
       id: true,
       email: true,
       name: true,
+      entity: true,
       isAdmin: true,
       createdAt: true,
     },
@@ -29,6 +30,7 @@ export async function createUser(data: {
   email: string;
   password: string;
   name: string;
+  entity: 'WENOV' | 'CEED';
   isAdmin?: boolean;
 }) {
   const session = await auth();
@@ -51,18 +53,20 @@ export async function createUser(data: {
       email: data.email,
       password: hashedPassword,
       name: data.name,
+      entity: data.entity,
       isAdmin: data.isAdmin || false,
     },
   });
 
   revalidatePath('/admin/users');
-  return { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin };
+  return { id: user.id, email: user.email, name: user.name, entity: user.entity, isAdmin: user.isAdmin };
 }
 
 export async function updateUser(
   id: string,
   data: {
     name?: string;
+    entity?: 'WENOV' | 'CEED';
     isAdmin?: boolean;
   }
 ) {
@@ -77,7 +81,7 @@ export async function updateUser(
   });
 
   revalidatePath('/admin/users');
-  return { id: user.id, email: user.email, name: user.name, isAdmin: user.isAdmin };
+  return { id: user.id, email: user.email, name: user.name, entity: user.entity, isAdmin: user.isAdmin };
 }
 
 export async function deleteUser(id: string) {
@@ -151,6 +155,7 @@ export async function getCurrentUser() {
       id: true,
       email: true,
       name: true,
+      entity: true,
       isAdmin: true,
       createdAt: true,
     },
