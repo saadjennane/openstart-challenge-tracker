@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -34,6 +35,19 @@ async function main() {
   await prisma.action.deleteMany();
   await prisma.contact.deleteMany();
   await prisma.challenge.deleteMany();
+  await prisma.user.deleteMany();
+
+  // Create admin user
+  const hashedPassword = await bcrypt.hash('123456', 10);
+  await prisma.user.create({
+    data: {
+      email: 'saadjennane@gmail.com',
+      password: hashedPassword,
+      name: 'Saad Jennane',
+      isAdmin: true,
+    },
+  });
+  console.log('Created admin user: saadjennane@gmail.com');
 
   // Create challenges with related data
   await prisma.challenge.create({

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { computeKpis, filterChallenges } from '@/lib/utils';
 import { Challenge, Filters, FilterType } from '@/lib/types';
 import KpiBar from '@/components/KpiBar';
@@ -12,9 +13,10 @@ interface DashboardClientProps {
   challenges: Challenge[];
   entities: string[];
   wenovOwners: string[];
+  user?: { name: string; isAdmin: boolean };
 }
 
-export default function DashboardClient({ challenges, entities, wenovOwners }: DashboardClientProps) {
+export default function DashboardClient({ challenges, entities, wenovOwners, user }: DashboardClientProps) {
   const [filters, setFilters] = useState<Filters>({
     activeFilter: 'all',
     search: '',
@@ -55,6 +57,17 @@ export default function DashboardClient({ challenges, entities, wenovOwners }: D
                 </svg>
                 Add Challenge
               </button>
+              {user && (
+                <Link
+                  href="/profile"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-semibold">
+                    {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </div>
+                  {user.name}
+                </Link>
+              )}
             </div>
           </div>
         </div>
