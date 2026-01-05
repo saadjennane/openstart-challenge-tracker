@@ -53,9 +53,12 @@ model Activity {
 
 model Contact {
   id        String   @id @default(cuid())
-  name      String
-  role      String
+  firstName String
+  lastName  String
+  function  String
+  company   String
   email     String
+  phone     String   @default("")
   group     String   // 'WENOV', 'Metier', 'Startup', 'OpenStart'
   createdAt DateTime @default(now())
 

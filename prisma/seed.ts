@@ -44,9 +44,9 @@ async function main() {
       startup_name: 'PayFlow',
       contacts: {
         create: [
-          { name: 'Othmane As Salih', role: 'Project Lead', email: 'othmane@wenov.com', group: 'WENOV' },
-          { name: 'Ahmed Bennani', role: 'Tech Lead', email: 'ahmed@wafasalaf.ma', group: 'Metier' },
-          { name: 'Sarah Chen', role: 'CEO', email: 'sarah@payflow.io', group: 'Startup' },
+          { firstName: 'Othmane', lastName: 'As Salih', function: 'Project Lead', company: 'WENOV', email: 'othmane@wenov.com', phone: '', group: 'WENOV' },
+          { firstName: 'Ahmed', lastName: 'Bennani', function: 'Tech Lead', company: 'WafaSalaf', email: 'ahmed@wafasalaf.ma', phone: '', group: 'Metier' },
+          { firstName: 'Sarah', lastName: 'Chen', function: 'CEO', company: 'PayFlow', email: 'sarah@payflow.io', phone: '', group: 'Startup' },
         ],
       },
       actions: {
@@ -75,9 +75,9 @@ async function main() {
       startup_name: 'AppNova',
       contacts: {
         create: [
-          { name: 'Asmaa Ouach', role: 'Innovation Manager', email: 'asmaa@wenov.com', group: 'WENOV' },
-          { name: 'Youssef Alami', role: 'Product Owner', email: 'youssef@awb.ma', group: 'Metier' },
-          { name: 'Tom Wilson', role: 'CTO', email: 'tom@appnova.io', group: 'Startup' },
+          { firstName: 'Asmaa', lastName: 'Ouach', function: 'Innovation Manager', company: 'WENOV', email: 'asmaa@wenov.com', phone: '', group: 'WENOV' },
+          { firstName: 'Youssef', lastName: 'Alami', function: 'Product Owner', company: 'AWB', email: 'youssef@awb.ma', phone: '', group: 'Metier' },
+          { firstName: 'Tom', lastName: 'Wilson', function: 'CTO', company: 'AppNova', email: 'tom@appnova.io', phone: '', group: 'Startup' },
         ],
       },
       actions: {
@@ -103,9 +103,9 @@ async function main() {
       startup_name: 'DataViz Pro',
       contacts: {
         create: [
-          { name: 'Rim Hachidi', role: 'Data Lead', email: 'rim@wenov.com', group: 'WENOV' },
-          { name: 'Karim Fassi', role: 'Analytics Director', email: 'karim@afm.ma', group: 'Metier' },
-          { name: 'Lisa Park', role: 'Founder', email: 'lisa@dataviz.io', group: 'Startup' },
+          { firstName: 'Rim', lastName: 'Hachidi', function: 'Data Lead', company: 'WENOV', email: 'rim@wenov.com', phone: '', group: 'WENOV' },
+          { firstName: 'Karim', lastName: 'Fassi', function: 'Analytics Director', company: 'AFM', email: 'karim@afm.ma', phone: '', group: 'Metier' },
+          { firstName: 'Lisa', lastName: 'Park', function: 'Founder', company: 'DataViz Pro', email: 'lisa@dataviz.io', phone: '', group: 'Startup' },
         ],
       },
       actions: {
@@ -131,9 +131,9 @@ async function main() {
       startup_name: 'CloudShift',
       contacts: {
         create: [
-          { name: 'Othmane As Salih', role: 'Cloud Architect', email: 'othmane@wenov.com', group: 'WENOV' },
-          { name: 'Hassan Berrada', role: 'IT Director', email: 'hassan@awb.ma', group: 'Metier' },
-          { name: 'James Lee', role: 'CEO', email: 'james@cloudshift.io', group: 'Startup' },
+          { firstName: 'Othmane', lastName: 'As Salih', function: 'Cloud Architect', company: 'WENOV', email: 'othmane@wenov.com', phone: '', group: 'WENOV' },
+          { firstName: 'Hassan', lastName: 'Berrada', function: 'IT Director', company: 'AWB', email: 'hassan@awb.ma', phone: '', group: 'Metier' },
+          { firstName: 'James', lastName: 'Lee', function: 'CEO', company: 'CloudShift', email: 'james@cloudshift.io', phone: '', group: 'Startup' },
         ],
       },
       actions: {
@@ -159,9 +159,9 @@ async function main() {
       startup_name: 'BotGenius',
       contacts: {
         create: [
-          { name: 'Asmaa Ouach', role: 'AI Lead', email: 'asmaa@wenov.com', group: 'WENOV' },
-          { name: 'Fatima Zahra', role: 'CS Manager', email: 'fatima@wafacash.ma', group: 'Metier' },
-          { name: 'Amy Zhang', role: 'Co-founder', email: 'amy@botgenius.io', group: 'Startup' },
+          { firstName: 'Asmaa', lastName: 'Ouach', function: 'AI Lead', company: 'WENOV', email: 'asmaa@wenov.com', phone: '', group: 'WENOV' },
+          { firstName: 'Fatima', lastName: 'Zahra', function: 'CS Manager', company: 'Wafa Cash', email: 'fatima@wafacash.ma', phone: '', group: 'Metier' },
+          { firstName: 'Amy', lastName: 'Zhang', function: 'Co-founder', company: 'BotGenius', email: 'amy@botgenius.io', phone: '', group: 'Startup' },
         ],
       },
       actions: {
@@ -189,9 +189,9 @@ async function main() {
       startup_name: 'TalentMatch AI',
       contacts: {
         create: [
-          { name: 'Rim Hachidi', role: 'HR Innovation', email: 'rim@wenov.com', group: 'WENOV' },
-          { name: 'Nadia Tazi', role: 'HR Director', email: 'nadia@awb.ma', group: 'Metier' },
-          { name: 'Julia Kim', role: 'CTO', email: 'julia@talentmatch.io', group: 'Startup' },
+          { firstName: 'Rim', lastName: 'Hachidi', function: 'HR Innovation', company: 'WENOV', email: 'rim@wenov.com', phone: '', group: 'WENOV' },
+          { firstName: 'Nadia', lastName: 'Tazi', function: 'HR Director', company: 'AWB', email: 'nadia@awb.ma', phone: '', group: 'Metier' },
+          { firstName: 'Julia', lastName: 'Kim', function: 'CTO', company: 'TalentMatch AI', email: 'julia@talentmatch.io', phone: '', group: 'Startup' },
         ],
       },
       actions: {

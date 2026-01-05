@@ -2,8 +2,8 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Challenge, Action, Activity, ActionOwner } from '@/lib/types';
-import { updateAction, createActivity, createAction } from '@/lib/actions';
+import { Challenge, Action, Activity, Contact, ActionOwner } from '@/lib/types';
+import { updateAction, createActivity, createAction, createContact, deleteContact } from '@/lib/actions';
 import ChallengeDetail from './ChallengeDetail';
 import EditChallengeModal from './EditChallengeModal';
 
@@ -94,6 +94,48 @@ export default function ChallengeDetailClient({ initialChallenge }: ChallengeDet
     });
   };
 
+  const handleAddContact = async (contactData: Omit<Contact, 'id'>) => {
+    // Optimistic update
+    const optimisticContact: Contact = {
+      id: `temp-${Date.now()}`,
+      ...contactData,
+    };
+
+    setChallenge((prev) => ({
+      ...prev,
+      contacts: [...prev.contacts, optimisticContact],
+    }));
+
+    // Server update
+    startTransition(async () => {
+      await createContact({
+        challengeId: challenge.id,
+        firstName: contactData.firstName,
+        lastName: contactData.lastName,
+        function: contactData.function,
+        company: contactData.company,
+        email: contactData.email,
+        phone: contactData.phone,
+        group: contactData.group,
+      });
+      router.refresh();
+    });
+  };
+
+  const handleDeleteContact = async (contactId: string) => {
+    // Optimistic update
+    setChallenge((prev) => ({
+      ...prev,
+      contacts: prev.contacts.filter((c) => c.id !== contactId),
+    }));
+
+    // Server update
+    startTransition(async () => {
+      await deleteContact(contactId, challenge.id);
+      router.refresh();
+    });
+  };
+
   const handleEditClick = () => {
     setIsEditModalOpen(true);
   };
@@ -109,6 +151,8 @@ export default function ChallengeDetailClient({ initialChallenge }: ChallengeDet
         onUpdateAction={handleUpdateAction}
         onAddActivity={handleAddActivity}
         onAddAction={handleAddAction}
+        onAddContact={handleAddContact}
+        onDeleteContact={handleDeleteContact}
         onEditClick={handleEditClick}
       />
       <EditChallengeModal

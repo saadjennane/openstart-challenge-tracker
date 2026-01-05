@@ -43,9 +43,12 @@ export async function getChallenges() {
     })),
     contacts: c.contacts.map((ct) => ({
       id: ct.id,
-      name: ct.name,
-      role: ct.role,
+      firstName: ct.firstName,
+      lastName: ct.lastName,
+      function: ct.function,
+      company: ct.company,
       email: ct.email,
+      phone: ct.phone,
       group: ct.group as 'WENOV' | 'Metier' | 'Startup' | 'OpenStart',
     })),
   }));
@@ -91,9 +94,12 @@ export async function getChallengeById(id: string) {
     })),
     contacts: challenge.contacts.map((ct) => ({
       id: ct.id,
-      name: ct.name,
-      role: ct.role,
+      firstName: ct.firstName,
+      lastName: ct.lastName,
+      function: ct.function,
+      company: ct.company,
       email: ct.email,
+      phone: ct.phone,
       group: ct.group as 'WENOV' | 'Metier' | 'Startup' | 'OpenStart',
     })),
   };
@@ -238,16 +244,22 @@ export async function createActivity(data: {
 // Contact actions
 export async function createContact(data: {
   challengeId: string;
-  name: string;
-  role: string;
+  firstName: string;
+  lastName: string;
+  function: string;
+  company: string;
   email: string;
+  phone?: string;
   group: 'WENOV' | 'Metier' | 'Startup' | 'OpenStart';
 }) {
   const contact = await prisma.contact.create({
     data: {
-      name: data.name,
-      role: data.role,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      function: data.function,
+      company: data.company,
       email: data.email,
+      phone: data.phone || '',
       group: data.group,
       challengeId: data.challengeId,
     },

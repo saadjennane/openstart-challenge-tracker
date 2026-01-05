@@ -11,6 +11,8 @@ interface ChallengeDetailProps {
   onUpdateAction: (actionId: string, updates: Partial<Action>) => void;
   onAddActivity: (activity: Omit<Activity, 'id' | 'challenge_id' | 'created_at'>) => void;
   onAddAction: (action: { title: string; owner: ActionOwner; due_date: string; is_urgent: boolean }) => void;
+  onAddContact: (contact: Omit<Contact, 'id'>) => void;
+  onDeleteContact: (contactId: string) => void;
   onEditClick: () => void;
 }
 
@@ -116,14 +118,27 @@ function ActionCard({ action, onToggleDone, onToggleUrgent }: ActionCardProps) {
 
 interface ContactsSectionProps {
   contacts: Contact[];
+  onAddContact: (contact: Omit<Contact, 'id'>) => void;
+  onDeleteContact: (contactId: string) => void;
 }
 
-function ContactsSection({ contacts }: ContactsSectionProps) {
+function ContactsSection({ contacts, onAddContact, onDeleteContact }: ContactsSectionProps) {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newContact, setNewContact] = useState({
+    firstName: '',
+    lastName: '',
+    function: '',
+    company: '',
+    email: '',
+    phone: '',
+    group: 'Metier' as ContactGroup,
+  });
+
   const groups: { key: ContactGroup; label: string; color: string }[] = [
     { key: 'WENOV', label: 'WENOV', color: 'bg-indigo-100 text-indigo-800' },
-    { key: 'Metier', label: 'Metier', color: 'bg-green-100 text-green-800' },
+    { key: 'Metier', label: 'Métier', color: 'bg-green-100 text-green-800' },
     { key: 'Startup', label: 'Startup', color: 'bg-blue-100 text-blue-800' },
-    { key: 'OpenStart', label: 'OpenStart Team', color: 'bg-purple-100 text-purple-800' },
+    { key: 'OpenStart', label: 'OpenStart', color: 'bg-purple-100 text-purple-800' },
   ];
 
   const groupedContacts = groups.map((group) => ({
@@ -131,47 +146,186 @@ function ContactsSection({ contacts }: ContactsSectionProps) {
     contacts: contacts.filter((c) => c.group === group.key),
   }));
 
-  if (contacts.length === 0) {
-    return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
-        No contacts yet
-      </div>
-    );
-  }
+  const handleSubmit = () => {
+    if (!newContact.firstName.trim() || !newContact.lastName.trim()) return;
+    onAddContact(newContact);
+    setNewContact({
+      firstName: '',
+      lastName: '',
+      function: '',
+      company: '',
+      email: '',
+      phone: '',
+      group: 'Metier',
+    });
+    setShowAddForm(false);
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {groupedContacts.map(
-        (group) =>
-          group.contacts.length > 0 && (
-            <div key={group.key} className="bg-white rounded-lg border border-gray-200 p-4">
-              <h4 className={`inline-block text-sm font-medium px-2 py-1 rounded mb-3 ${group.color}`}>
-                {group.label}
-              </h4>
-              <div className="space-y-3">
-                {group.contacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
-                      {contact.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{contact.name}</p>
-                      <p className="text-sm text-gray-500">{contact.role}</p>
-                      <a
-                        href={`mailto:${contact.email}`}
-                        className="text-sm text-indigo-600 hover:text-indigo-800"
-                      >
-                        {contact.email}
-                      </a>
-                    </div>
-                  </div>
+    <div className="space-y-4">
+      {/* Add Contact Button */}
+      <button
+        onClick={() => setShowAddForm(!showAddForm)}
+        className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+        Ajouter un contact
+      </button>
+
+      {/* Add Contact Form */}
+      {showAddForm && (
+        <div className="bg-white rounded-lg border border-indigo-200 p-4">
+          <h4 className="font-medium text-gray-900 mb-3">Nouveau contact</h4>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Prénom"
+                value={newContact.firstName}
+                onChange={(e) => setNewContact({ ...newContact, firstName: e.target.value })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              <input
+                type="text"
+                placeholder="Nom"
+                value={newContact.lastName}
+                onChange={(e) => setNewContact({ ...newContact, lastName: e.target.value })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Fonction"
+              value={newContact.function}
+              onChange={(e) => setNewContact({ ...newContact, function: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <input
+              type="text"
+              placeholder="Entreprise"
+              value={newContact.company}
+              onChange={(e) => setNewContact({ ...newContact, company: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="email"
+                placeholder="Email"
+                value={newContact.email}
+                onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              <input
+                type="tel"
+                placeholder="Téléphone"
+                value={newContact.phone}
+                onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Groupe</label>
+              <div className="flex flex-wrap gap-2">
+                {groups.map((group) => (
+                  <button
+                    key={group.key}
+                    type="button"
+                    onClick={() => setNewContact({ ...newContact, group: group.key })}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      newContact.group === group.key
+                        ? group.color
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {group.label}
+                  </button>
                 ))}
               </div>
             </div>
-          )
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={!newContact.firstName.trim() || !newContact.lastName.trim()}
+                className="flex-1 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Ajouter
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contacts List */}
+      {contacts.length === 0 && !showAddForm ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-6 text-center text-gray-500">
+          Aucun contact
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {groupedContacts.map(
+            (group) =>
+              group.contacts.length > 0 && (
+                <div key={group.key} className="bg-white rounded-lg border border-gray-200 p-4">
+                  <h4 className={`inline-block text-sm font-medium px-2 py-1 rounded mb-3 ${group.color}`}>
+                    {group.label}
+                  </h4>
+                  <div className="space-y-3">
+                    {group.contacts.map((contact) => (
+                      <div key={contact.id} className="flex items-start gap-3 group">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium text-sm flex-shrink-0">
+                          {contact.firstName[0]}{contact.lastName[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900">
+                            {contact.firstName} {contact.lastName}
+                          </p>
+                          <p className="text-sm text-gray-500">{contact.function}</p>
+                          {contact.company && (
+                            <p className="text-sm text-gray-400">{contact.company}</p>
+                          )}
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {contact.email && (
+                              <a
+                                href={`mailto:${contact.email}`}
+                                className="text-xs text-indigo-600 hover:text-indigo-800"
+                              >
+                                {contact.email}
+                              </a>
+                            )}
+                            {contact.phone && (
+                              <a
+                                href={`tel:${contact.phone}`}
+                                className="text-xs text-gray-500 hover:text-gray-700"
+                              >
+                                {contact.phone}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => onDeleteContact(contact.id)}
+                          className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Supprimer"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+          )}
+        </div>
       )}
     </div>
   );
@@ -201,6 +355,8 @@ export default function ChallengeDetail({
   onUpdateAction,
   onAddActivity,
   onAddAction,
+  onAddContact,
+  onDeleteContact,
   onEditClick,
 }: ChallengeDetailProps) {
   const actionOwners = getActionOwners(challenge.entity);
@@ -464,7 +620,11 @@ export default function ChallengeDetail({
           {/* Right Column - Contacts */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Contacts</h2>
-            <ContactsSection contacts={challenge.contacts} />
+            <ContactsSection
+              contacts={challenge.contacts}
+              onAddContact={onAddContact}
+              onDeleteContact={onDeleteContact}
+            />
           </div>
         </div>
       </main>

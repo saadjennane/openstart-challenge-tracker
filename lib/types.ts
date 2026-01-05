@@ -16,9 +16,12 @@ export interface Action {
 
 export interface Contact {
   id: string;
-  name: string;
-  role: string;
+  firstName: string;
+  lastName: string;
+  function: string;
+  company: string;
   email: string;
+  phone: string;
   group: ContactGroup;
 }
 
