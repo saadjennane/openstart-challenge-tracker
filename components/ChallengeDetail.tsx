@@ -6,8 +6,15 @@ import { Challenge, Action, Activity, Contact, ContactGroup, ChallengeStatus, Ac
 import { isOverdue, formatDueDate, getOpenActions } from '@/lib/utils';
 import ActivitiesTimeline from './ActivitiesTimeline';
 
+interface Member {
+  id: string;
+  name: string;
+  entity: string;
+}
+
 interface ChallengeDetailProps {
   challenge: Challenge;
+  members: Member[];
   onUpdateAction: (actionId: string, updates: Partial<Action>) => void;
   onAddActivity: (activity: Omit<Activity, 'id' | 'challenge_id' | 'created_at'>) => void;
   onAddAction: (action: { title: string; owner: ActionOwner; due_date: string; is_urgent: boolean }) => void;
@@ -19,8 +26,10 @@ interface ChallengeDetailProps {
 
 interface ActionCardProps {
   action: Action;
+  members: Member[];
   onToggleDone: () => void;
   onToggleUrgent: () => void;
+  onAssign: (memberId: string | null) => void;
 }
 
 // Status badge styles
@@ -49,7 +58,8 @@ const getOwnerColor = (owner: ActionOwner): string => {
   }
 };
 
-function ActionCard({ action, onToggleDone, onToggleUrgent }: ActionCardProps) {
+function ActionCard({ action, members, onToggleDone, onToggleUrgent, onAssign }: ActionCardProps) {
+  const [showAssignMenu, setShowAssignMenu] = useState(false);
   const overdue = isOverdue(action);
   const ownerColor = getOwnerColor(action.owner);
 
@@ -90,16 +100,68 @@ function ActionCard({ action, onToggleDone, onToggleUrgent }: ActionCardProps) {
               {overdue && !action.is_done && <span title="Overdue">⚠️</span>}
             </div>
             <p className={`text-gray-900 ${action.is_done ? 'line-through' : ''}`}>{action.title}</p>
-            <p
-              className={`text-sm mt-1 ${
-                overdue && !action.is_done ? 'text-red-600 font-medium' : 'text-gray-500'
-              }`}
-            >
-              Due: {formatDueDate(action.due_date)}
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p
+                className={`text-sm ${
+                  overdue && !action.is_done ? 'text-red-600 font-medium' : 'text-gray-500'
+                }`}
+              >
+                Due: {formatDueDate(action.due_date)}
+              </p>
+              {action.assignee_name && (
+                <span className="inline-flex items-center gap-1 text-xs text-indigo-600">
+                  <span className="w-4 h-4 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-medium">
+                    {action.assignee_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </span>
+                  {action.assignee_name.split(' ')[0]}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex gap-2">
+          {/* Assign button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAssignMenu(!showAssignMenu)}
+              className={`p-2 rounded-lg transition-colors ${
+                action.assignee_id
+                  ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              title={action.assignee_name || 'Assigner un membre'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            {showAssignMenu && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                <button
+                  onClick={() => { onAssign(null); setShowAssignMenu(false); }}
+                  className="w-full px-3 py-2 text-left text-sm text-gray-500 hover:bg-gray-50"
+                >
+                  Non assigné
+                </button>
+                {members.map((member) => (
+                  <button
+                    key={member.id}
+                    onClick={() => { onAssign(member.id); setShowAssignMenu(false); }}
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 ${
+                      action.assignee_id === member.id ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700'
+                    }`}
+                  >
+                    <span className={`w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-medium ${
+                      member.entity === 'WENOV' ? 'bg-indigo-600' : 'bg-emerald-600'
+                    }`}>
+                      {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    </span>
+                    <span>{member.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             onClick={onToggleUrgent}
             className={`p-2 rounded-lg transition-colors ${
@@ -499,6 +561,7 @@ const getActionOwners = (entity: string): { value: string; label: string; color:
 
 export default function ChallengeDetail({
   challenge,
+  members,
   onUpdateAction,
   onAddActivity,
   onAddAction,
@@ -720,8 +783,16 @@ export default function ChallengeDetail({
                     <ActionCard
                       key={action.id}
                       action={action}
+                      members={members}
                       onToggleDone={() => onUpdateAction(action.id, { is_done: !action.is_done })}
                       onToggleUrgent={() => onUpdateAction(action.id, { is_urgent: !action.is_urgent })}
+                      onAssign={(memberId) => {
+                        const member = memberId ? members.find(m => m.id === memberId) : null;
+                        onUpdateAction(action.id, {
+                          assignee_id: memberId || undefined,
+                          assignee_name: member?.name || undefined
+                        });
+                      }}
                     />
                   ))}
                 </div>
@@ -746,8 +817,16 @@ export default function ChallengeDetail({
                     <ActionCard
                       key={action.id}
                       action={action}
+                      members={members}
                       onToggleDone={() => onUpdateAction(action.id, { is_done: !action.is_done })}
                       onToggleUrgent={() => onUpdateAction(action.id, { is_urgent: !action.is_urgent })}
+                      onAssign={(memberId) => {
+                        const member = memberId ? members.find(m => m.id === memberId) : null;
+                        onUpdateAction(action.id, {
+                          assignee_id: memberId || undefined,
+                          assignee_name: member?.name || undefined
+                        });
+                      }}
                     />
                   ))}
                 </div>

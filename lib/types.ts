@@ -12,6 +12,8 @@ export interface Action {
   due_date: string;
   is_done: boolean;
   is_urgent: boolean;
+  assignee_id?: string;
+  assignee_name?: string;
 }
 
 export interface Contact {

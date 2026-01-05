@@ -7,11 +7,18 @@ import { updateAction, createActivity, createAction, createContact, updateContac
 import ChallengeDetail from './ChallengeDetail';
 import EditChallengeModal from './EditChallengeModal';
 
-interface ChallengeDetailClientProps {
-  initialChallenge: Challenge;
+interface Member {
+  id: string;
+  name: string;
+  entity: string;
 }
 
-export default function ChallengeDetailClient({ initialChallenge }: ChallengeDetailClientProps) {
+interface ChallengeDetailClientProps {
+  initialChallenge: Challenge;
+  members: Member[];
+}
+
+export default function ChallengeDetailClient({ initialChallenge, members }: ChallengeDetailClientProps) {
   const router = useRouter();
   const [challenge, setChallenge] = useState<Challenge>(initialChallenge);
   const [isPending, startTransition] = useTransition();
@@ -164,6 +171,7 @@ export default function ChallengeDetailClient({ initialChallenge }: ChallengeDet
     <>
       <ChallengeDetail
         challenge={challenge}
+        members={members}
         onUpdateAction={handleUpdateAction}
         onAddActivity={handleAddActivity}
         onAddAction={handleAddAction}

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getChallengeById } from '@/lib/actions';
+import { getChallengeById, getMembers } from '@/lib/actions';
 import ChallengeDetailClient from '@/components/ChallengeDetailClient';
 
 export const dynamic = 'force-dynamic';
@@ -10,11 +10,14 @@ interface PageProps {
 
 export default async function ChallengeDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const challenge = await getChallengeById(id);
+  const [challenge, members] = await Promise.all([
+    getChallengeById(id),
+    getMembers(),
+  ]);
 
   if (!challenge) {
     notFound();
   }
 
-  return <ChallengeDetailClient initialChallenge={challenge} />;
+  return <ChallengeDetailClient initialChallenge={challenge} members={members} />;
 }

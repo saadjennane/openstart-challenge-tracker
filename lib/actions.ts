@@ -8,7 +8,13 @@ import { ChallengeStatus } from './types';
 export async function getChallenges() {
   const challenges = await prisma.challenge.findMany({
     include: {
-      actions: true,
+      actions: {
+        include: {
+          assignee: {
+            select: { id: true, name: true },
+          },
+        },
+      },
       activities: {
         orderBy: { createdAt: 'desc' },
       },
@@ -32,6 +38,8 @@ export async function getChallenges() {
       due_date: a.due_date.toISOString().split('T')[0],
       is_done: a.is_done,
       is_urgent: a.is_urgent,
+      assignee_id: a.assigneeId || undefined,
+      assignee_name: a.assignee?.name || undefined,
     })),
     activities: c.activities.map((a) => ({
       id: a.id,
@@ -58,7 +66,13 @@ export async function getChallengeById(id: string) {
   const challenge = await prisma.challenge.findUnique({
     where: { id },
     include: {
-      actions: true,
+      actions: {
+        include: {
+          assignee: {
+            select: { id: true, name: true },
+          },
+        },
+      },
       activities: {
         orderBy: { createdAt: 'desc' },
       },
@@ -83,6 +97,8 @@ export async function getChallengeById(id: string) {
       due_date: a.due_date.toISOString().split('T')[0],
       is_done: a.is_done,
       is_urgent: a.is_urgent,
+      assignee_id: a.assigneeId || undefined,
+      assignee_name: a.assignee?.name || undefined,
     })),
     activities: challenge.activities.map((a) => ({
       id: a.id,
@@ -195,6 +211,7 @@ export async function updateAction(
     due_date?: string;
     is_done?: boolean;
     is_urgent?: boolean;
+    assignee_id?: string | null;
   }
 ) {
   const updateData: Record<string, unknown> = {};
@@ -203,6 +220,7 @@ export async function updateAction(
   if (data.due_date !== undefined) updateData.due_date = new Date(data.due_date);
   if (data.is_done !== undefined) updateData.is_done = data.is_done;
   if (data.is_urgent !== undefined) updateData.is_urgent = data.is_urgent;
+  if (data.assignee_id !== undefined) updateData.assigneeId = data.assignee_id;
 
   const action = await prisma.action.update({
     where: { id },
@@ -210,6 +228,7 @@ export async function updateAction(
   });
   revalidatePath('/');
   revalidatePath(`/challenge/${challengeId}`);
+  revalidatePath('/actions');
   return action;
 }
 
@@ -311,4 +330,50 @@ export async function getWenovOwners() {
     distinct: ['wenov_responsible'],
   });
   return challenges.map((c) => c.wenov_responsible).filter(Boolean).sort();
+}
+
+export async function getMembers() {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      entity: true,
+    },
+    orderBy: { name: 'asc' },
+  });
+  return users;
+}
+
+export async function getAllActions() {
+  const actions = await prisma.action.findMany({
+    include: {
+      challenge: {
+        select: {
+          id: true,
+          name: true,
+          entity: true,
+          startup_name: true,
+        },
+      },
+      assignee: {
+        select: { id: true, name: true },
+      },
+    },
+    orderBy: [{ is_done: 'asc' }, { due_date: 'asc' }],
+  });
+
+  return actions.map((a) => ({
+    id: a.id,
+    challenge_id: a.challengeId,
+    challenge_name: a.challenge.name,
+    challenge_entity: a.challenge.entity,
+    startup_name: a.challenge.startup_name,
+    title: a.title,
+    owner: a.owner,
+    due_date: a.due_date.toISOString().split('T')[0],
+    is_done: a.is_done,
+    is_urgent: a.is_urgent,
+    assignee_id: a.assigneeId || undefined,
+    assignee_name: a.assignee?.name || undefined,
+  }));
 }
