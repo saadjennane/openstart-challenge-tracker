@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Challenge {
+  id                String     @id @default(cuid())
+  name              String
+  wenov_responsible String     @default("")
+  entity            String     @default("")
+  startup_name      String     @default("")
+  status            String     @default("ongoing") // 'ongoing', 'overdue', 'standby', 'done'
+  sortOrder         Int        @default(0)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  actions    Action[]
+  activities Activity[]
+  contacts   Contact[]
+}
+
+model Action {
+  id           String   @id @default(cuid())
+  title        String
+  owner        String   // 'AWB' or 'STARTUP'
+  due_date     DateTime
+  is_done      Boolean  @default(false)
+  is_urgent    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  challenge    Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId  String
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String   // 'call', 'meeting', 'email', 'note'
+  note        String
+  link        String?
+  createdAt   DateTime @default(now())
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId String
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  email     String
+  group     String   // 'WENOV', 'Metier', 'Startup', 'OpenStart'
+  createdAt DateTime @default(now())
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId String
+}
