@@ -12,6 +12,7 @@ interface ChallengeDetailProps {
   onAddActivity: (activity: Omit<Activity, 'id' | 'challenge_id' | 'created_at'>) => void;
   onAddAction: (action: { title: string; owner: ActionOwner; due_date: string; is_urgent: boolean }) => void;
   onAddContact: (contact: Omit<Contact, 'id'>) => void;
+  onUpdateContact: (contactId: string, updates: Partial<Contact>) => void;
   onDeleteContact: (contactId: string) => void;
   onEditClick: () => void;
 }
@@ -119,12 +120,23 @@ function ActionCard({ action, onToggleDone, onToggleUrgent }: ActionCardProps) {
 interface ContactsSectionProps {
   contacts: Contact[];
   onAddContact: (contact: Omit<Contact, 'id'>) => void;
+  onUpdateContact: (contactId: string, updates: Partial<Contact>) => void;
   onDeleteContact: (contactId: string) => void;
 }
 
-function ContactsSection({ contacts, onAddContact, onDeleteContact }: ContactsSectionProps) {
+function ContactsSection({ contacts, onAddContact, onUpdateContact, onDeleteContact }: ContactsSectionProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [newContact, setNewContact] = useState({
+    firstName: '',
+    lastName: '',
+    function: '',
+    company: '',
+    email: '',
+    phone: '',
+    group: 'Metier' as ContactGroup,
+  });
+  const [editContact, setEditContact] = useState({
     firstName: '',
     lastName: '',
     function: '',
@@ -159,6 +171,38 @@ function ContactsSection({ contacts, onAddContact, onDeleteContact }: ContactsSe
       group: 'Metier',
     });
     setShowAddForm(false);
+  };
+
+  const handleStartEdit = (contact: Contact) => {
+    setEditingContactId(contact.id);
+    setEditContact({
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      function: contact.function,
+      company: contact.company,
+      email: contact.email,
+      phone: contact.phone || '',
+      group: contact.group,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingContactId(null);
+    setEditContact({
+      firstName: '',
+      lastName: '',
+      function: '',
+      company: '',
+      email: '',
+      phone: '',
+      group: 'Metier',
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingContactId || !editContact.firstName.trim() || !editContact.lastName.trim()) return;
+    onUpdateContact(editingContactId, editContact);
+    handleCancelEdit();
   };
 
   return (
@@ -279,46 +323,149 @@ function ContactsSection({ contacts, onAddContact, onDeleteContact }: ContactsSe
                   </h4>
                   <div className="space-y-3">
                     {group.contacts.map((contact) => (
-                      <div key={contact.id} className="flex items-start gap-3 group">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium text-sm flex-shrink-0">
-                          {contact.firstName[0]}{contact.lastName[0]}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900">
-                            {contact.firstName} {contact.lastName}
-                          </p>
-                          <p className="text-sm text-gray-500">{contact.function}</p>
-                          {contact.company && (
-                            <p className="text-sm text-gray-400">{contact.company}</p>
-                          )}
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {contact.email && (
-                              <a
-                                href={`mailto:${contact.email}`}
-                                className="text-xs text-indigo-600 hover:text-indigo-800"
-                              >
-                                {contact.email}
-                              </a>
-                            )}
-                            {contact.phone && (
-                              <a
-                                href={`tel:${contact.phone}`}
-                                className="text-xs text-gray-500 hover:text-gray-700"
-                              >
-                                {contact.phone}
-                              </a>
-                            )}
+                      <div key={contact.id}>
+                        {editingContactId === contact.id ? (
+                          /* Edit Form */
+                          <div className="bg-gray-50 rounded-lg border border-indigo-200 p-4">
+                            <h4 className="font-medium text-gray-900 mb-3">Modifier le contact</h4>
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <input
+                                  type="text"
+                                  placeholder="Prénom"
+                                  value={editContact.firstName}
+                                  onChange={(e) => setEditContact({ ...editContact, firstName: e.target.value })}
+                                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Nom"
+                                  value={editContact.lastName}
+                                  onChange={(e) => setEditContact({ ...editContact, lastName: e.target.value })}
+                                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                placeholder="Fonction"
+                                value={editContact.function}
+                                onChange={(e) => setEditContact({ ...editContact, function: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Entreprise"
+                                value={editContact.company}
+                                onChange={(e) => setEditContact({ ...editContact, company: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                              <div className="grid grid-cols-2 gap-3">
+                                <input
+                                  type="email"
+                                  placeholder="Email"
+                                  value={editContact.email}
+                                  onChange={(e) => setEditContact({ ...editContact, email: e.target.value })}
+                                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <input
+                                  type="tel"
+                                  placeholder="Téléphone"
+                                  value={editContact.phone}
+                                  onChange={(e) => setEditContact({ ...editContact, phone: e.target.value })}
+                                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Groupe</label>
+                                <div className="flex flex-wrap gap-2">
+                                  {groups.map((g) => (
+                                    <button
+                                      key={g.key}
+                                      type="button"
+                                      onClick={() => setEditContact({ ...editContact, group: g.key })}
+                                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                                        editContact.group === g.key
+                                          ? g.color
+                                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                      }`}
+                                    >
+                                      {g.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-2">
+                                <button
+                                  onClick={handleCancelEdit}
+                                  className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                  Annuler
+                                </button>
+                                <button
+                                  onClick={handleSaveEdit}
+                                  disabled={!editContact.firstName.trim() || !editContact.lastName.trim()}
+                                  className="flex-1 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  Enregistrer
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <button
-                          onClick={() => onDeleteContact(contact.id)}
-                          className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Supprimer"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
+                        ) : (
+                          /* Contact Display */
+                          <div className="flex items-start gap-3 group">
+                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium text-sm flex-shrink-0">
+                              {contact.firstName[0]}{contact.lastName[0]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900">
+                                {contact.firstName} {contact.lastName}
+                              </p>
+                              <p className="text-sm text-gray-500">{contact.function}</p>
+                              {contact.company && (
+                                <p className="text-sm text-gray-400">{contact.company}</p>
+                              )}
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {contact.email && (
+                                  <a
+                                    href={`mailto:${contact.email}`}
+                                    className="text-xs text-indigo-600 hover:text-indigo-800"
+                                  >
+                                    {contact.email}
+                                  </a>
+                                )}
+                                {contact.phone && (
+                                  <a
+                                    href={`tel:${contact.phone}`}
+                                    className="text-xs text-gray-500 hover:text-gray-700"
+                                  >
+                                    {contact.phone}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => handleStartEdit(contact)}
+                                className="p-1 text-gray-400 hover:text-indigo-500"
+                                title="Modifier"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => onDeleteContact(contact.id)}
+                                className="p-1 text-gray-400 hover:text-red-500"
+                                title="Supprimer"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -356,6 +503,7 @@ export default function ChallengeDetail({
   onAddActivity,
   onAddAction,
   onAddContact,
+  onUpdateContact,
   onDeleteContact,
   onEditClick,
 }: ChallengeDetailProps) {
@@ -623,6 +771,7 @@ export default function ChallengeDetail({
             <ContactsSection
               contacts={challenge.contacts}
               onAddContact={onAddContact}
+              onUpdateContact={onUpdateContact}
               onDeleteContact={onDeleteContact}
             />
           </div>

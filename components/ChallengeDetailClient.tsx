@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Challenge, Action, Activity, Contact, ActionOwner } from '@/lib/types';
-import { updateAction, createActivity, createAction, createContact, deleteContact } from '@/lib/actions';
+import { updateAction, createActivity, createAction, createContact, updateContact, deleteContact } from '@/lib/actions';
 import ChallengeDetail from './ChallengeDetail';
 import EditChallengeModal from './EditChallengeModal';
 
@@ -122,6 +122,22 @@ export default function ChallengeDetailClient({ initialChallenge }: ChallengeDet
     });
   };
 
+  const handleUpdateContact = async (contactId: string, updates: Partial<Contact>) => {
+    // Optimistic update
+    setChallenge((prev) => ({
+      ...prev,
+      contacts: prev.contacts.map((contact) =>
+        contact.id === contactId ? { ...contact, ...updates } : contact
+      ),
+    }));
+
+    // Server update
+    startTransition(async () => {
+      await updateContact(contactId, challenge.id, updates);
+      router.refresh();
+    });
+  };
+
   const handleDeleteContact = async (contactId: string) => {
     // Optimistic update
     setChallenge((prev) => ({
@@ -152,6 +168,7 @@ export default function ChallengeDetailClient({ initialChallenge }: ChallengeDet
         onAddActivity={handleAddActivity}
         onAddAction={handleAddAction}
         onAddContact={handleAddContact}
+        onUpdateContact={handleUpdateContact}
         onDeleteContact={handleDeleteContact}
         onEditClick={handleEditClick}
       />

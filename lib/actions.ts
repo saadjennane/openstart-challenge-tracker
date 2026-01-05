@@ -268,6 +268,27 @@ export async function createContact(data: {
   return contact;
 }
 
+export async function updateContact(
+  id: string,
+  challengeId: string,
+  data: {
+    firstName?: string;
+    lastName?: string;
+    function?: string;
+    company?: string;
+    email?: string;
+    phone?: string;
+    group?: 'WENOV' | 'Metier' | 'Startup' | 'OpenStart';
+  }
+) {
+  const contact = await prisma.contact.update({
+    where: { id },
+    data,
+  });
+  revalidatePath(`/challenge/${challengeId}`);
+  return contact;
+}
+
 export async function deleteContact(id: string, challengeId: string) {
   await prisma.contact.delete({
     where: { id },
