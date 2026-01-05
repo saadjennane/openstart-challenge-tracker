@@ -67,6 +67,21 @@ export default function UsersManagementClient({ users, currentUserId }: UsersMan
     }
   };
 
+  const handleToggleEntity = async (userId: string, currentEntity: string) => {
+    setError('');
+    setMessage('');
+
+    const newEntity = currentEntity === 'WENOV' ? 'CEED' : 'WENOV';
+
+    try {
+      await updateUser(userId, { entity: newEntity as UserEntity });
+      setMessage('Entité mise à jour avec succès');
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    }
+  };
+
   const handleDeleteUser = async (userId: string, userName: string) => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${userName} ?`)) {
       return;
@@ -284,11 +299,21 @@ export default function UsersManagementClient({ users, currentUserId }: UsersMan
                 {user.id !== currentUserId && (
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => handleToggleEntity(user.id, user.entity)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                        user.entity === 'WENOV'
+                          ? 'text-emerald-700 bg-emerald-100 hover:bg-emerald-200'
+                          : 'text-indigo-700 bg-indigo-100 hover:bg-indigo-200'
+                      }`}
+                    >
+                      → {user.entity === 'WENOV' ? 'CEED' : 'WENOV'}
+                    </button>
+                    <button
                       onClick={() => handleToggleAdmin(user.id, user.isAdmin)}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                         user.isAdmin
                           ? 'text-orange-700 bg-orange-100 hover:bg-orange-200'
-                          : 'text-indigo-700 bg-indigo-100 hover:bg-indigo-200'
+                          : 'text-amber-700 bg-amber-100 hover:bg-amber-200'
                       }`}
                     >
                       {user.isAdmin ? 'Retirer admin' : 'Rendre admin'}
