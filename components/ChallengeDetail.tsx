@@ -17,6 +17,8 @@ interface ChallengeDetailProps {
   members: Member[];
   onUpdateAction: (actionId: string, updates: Partial<Action>) => void;
   onAddActivity: (activity: Omit<Activity, 'id' | 'challenge_id' | 'created_at'>) => void;
+  onUpdateActivity: (activityId: string, updates: Partial<Activity>) => void;
+  onDeleteActivity: (activityId: string) => void;
   onAddAction: (action: { title: string; owner: ActionOwner; due_date: string; is_urgent: boolean }) => void;
   onAddContact: (contact: Omit<Contact, 'id'>) => void;
   onUpdateContact: (contactId: string, updates: Partial<Contact>) => void;
@@ -564,6 +566,8 @@ export default function ChallengeDetail({
   members,
   onUpdateAction,
   onAddActivity,
+  onUpdateActivity,
+  onDeleteActivity,
   onAddAction,
   onAddContact,
   onUpdateContact,
@@ -840,6 +844,8 @@ export default function ChallengeDetail({
                 activities={challenge.activities}
                 challengeId={challenge.id}
                 onAddActivity={onAddActivity}
+                onUpdateActivity={onUpdateActivity}
+                onDeleteActivity={onDeleteActivity}
               />
             </section>
           </div>

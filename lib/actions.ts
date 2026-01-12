@@ -260,6 +260,30 @@ export async function createActivity(data: {
   return activity;
 }
 
+export async function updateActivity(
+  id: string,
+  challengeId: string,
+  data: {
+    type?: 'call' | 'meeting' | 'email' | 'note';
+    note?: string;
+    link?: string;
+  }
+) {
+  const activity = await prisma.activity.update({
+    where: { id },
+    data,
+  });
+  revalidatePath(`/challenge/${challengeId}`);
+  return activity;
+}
+
+export async function deleteActivity(id: string, challengeId: string) {
+  await prisma.activity.delete({
+    where: { id },
+  });
+  revalidatePath(`/challenge/${challengeId}`);
+}
+
 // Contact actions
 export async function createContact(data: {
   challengeId: string;

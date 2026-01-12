@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Challenge, Action, Activity, Contact, ActionOwner } from '@/lib/types';
-import { updateAction, createActivity, createAction, createContact, updateContact, deleteContact } from '@/lib/actions';
+import { updateAction, createActivity, updateActivity, deleteActivity, createAction, createContact, updateContact, deleteContact } from '@/lib/actions';
 import ChallengeDetail from './ChallengeDetail';
 import EditChallengeModal from './EditChallengeModal';
 
@@ -67,6 +67,36 @@ export default function ChallengeDetailClient({ initialChallenge, members }: Cha
         note: activityData.note,
         link: activityData.link,
       });
+      router.refresh();
+    });
+  };
+
+  const handleUpdateActivity = async (activityId: string, updates: Partial<Activity>) => {
+    // Optimistic update
+    setChallenge((prev) => ({
+      ...prev,
+      activities: prev.activities.map((activity) =>
+        activity.id === activityId ? { ...activity, ...updates } : activity
+      ),
+    }));
+
+    // Server update
+    startTransition(async () => {
+      await updateActivity(activityId, challenge.id, updates);
+      router.refresh();
+    });
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    // Optimistic update
+    setChallenge((prev) => ({
+      ...prev,
+      activities: prev.activities.filter((a) => a.id !== activityId),
+    }));
+
+    // Server update
+    startTransition(async () => {
+      await deleteActivity(activityId, challenge.id);
       router.refresh();
     });
   };
@@ -174,6 +204,8 @@ export default function ChallengeDetailClient({ initialChallenge, members }: Cha
         members={members}
         onUpdateAction={handleUpdateAction}
         onAddActivity={handleAddActivity}
+        onUpdateActivity={handleUpdateActivity}
+        onDeleteActivity={handleDeleteActivity}
         onAddAction={handleAddAction}
         onAddContact={handleAddContact}
         onUpdateContact={handleUpdateContact}
